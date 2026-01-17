@@ -1,12 +1,10 @@
 /* Tropas x Pontos - Calculadora (overlay) para Tribal Wars
    - Não automatiza nada: só calcula e mostra UI
-   - Baseada na fórmula do tópico do fórum:
-     https://forum.tribalwars.com.br/index.php?threads/tropas-como-saber-a-quantidade-certa-de-tropas.128962/
+   - Referência (ideia): https://forum.tribalwars.com.br/index.php?threads/tropas-como-saber-a-quantidade-certa-de-tropas.128962/
 */
 (function () {
   'use strict';
 
-  // ---------- Helpers ----------
   function parseBRInt(v) {
     if (v === null || v === undefined) return 0;
     let s = String(v).trim();
@@ -15,17 +13,12 @@
     s = s.replace(/[^\d]/g, '');
     return s ? parseInt(s, 10) : 0;
   }
-
   function fmt(n) {
     try { return (n ?? 0).toLocaleString('pt-BR'); }
     catch { return String(n ?? 0); }
   }
+  function ceilDiv(a, b) { return Math.ceil(a / b); }
 
-  function ceilDiv(a, b) {
-    return Math.ceil(a / b);
-  }
-
-  // ---------- Ensure jQuery ----------
   // TW normalmente já tem jQuery. Se não tiver, tenta carregar.
   function withJQ(cb) {
     if (window.jQuery) return cb(window.jQuery);
@@ -36,82 +29,57 @@
   }
 
   withJQ(function ($) {
-    // ---------- Remove se já existir ----------
+    // remove se já existir
     $('#twTroopsCalcOverlay, #twTroopsCalcStyle').remove();
 
-    // ---------- Styles ----------
+    // CSS
     const css = `
 #twTroopsCalcOverlay{
   position:fixed; z-index:999999;
-  top:90px; left:40px;
-  width:420px;
-  background:#161b22;
-  border:1px solid #263040;
-  border-radius:10px;
-  box-shadow: 0 12px 30px rgba(0,0,0,.35);
-  color:#e9eef5;
-  font-family: Arial, sans-serif;
+  top:90px; left:40px; width:420px;
+  background:#161b22; border:1px solid #263040; border-radius:10px;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+  color:#e9eef5; font-family:Arial,sans-serif;
 }
 #twTroopsCalcHeader{
-  cursor:move;
-  background:#202225;
-  border-bottom:1px solid #263040;
-  padding:10px 12px;
-  border-top-left-radius:10px;
-  border-top-right-radius:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  user-select:none;
+  cursor:move; user-select:none;
+  background:#202225; border-bottom:1px solid #263040;
+  padding:10px 12px; border-top-left-radius:10px; border-top-right-radius:10px;
+  display:flex; justify-content:space-between; align-items:center;
 }
 #twTroopsCalcHeader b{ font-size:13px; }
 #twTroopsCalcClose{
-  background:#fb7185; color:#111;
-  border:none; border-radius:8px;
-  padding:6px 10px; cursor:pointer;
-  font-weight:700;
+  background:#fb7185; color:#111; border:none; border-radius:8px;
+  padding:6px 10px; cursor:pointer; font-weight:700;
 }
 #twTroopsCalcBody{ padding:12px; }
-.twTCRow{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px; }
-.twTCRow3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+.twTCRow{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.twTCRow3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
 .twTCLabel{ font-size:11px; color:#9fb0c5; margin-bottom:6px; display:block; }
-.twTCInput, .twTCSelect{
-  width:100%;
-  box-sizing:border-box;
-  padding:8px 10px;
-  border-radius:8px;
-  border:1px solid #2a3648;
-  background:#0f1216;
-  color:#e9eef5;
+.twTCInput,.twTCSelect{
+  width:100%; box-sizing:border-box; padding:8px 10px;
+  border-radius:8px; border:1px solid #2a3648;
+  background:#0f1216; color:#e9eef5;
 }
 .twTCBtn{
-  cursor:pointer;
-  padding:9px 10px;
-  border-radius:10px;
-  border:1px solid #2a3648;
-  background:#0f1216;
-  color:#e9eef5;
-  font-weight:700;
+  cursor:pointer; padding:9px 10px; border-radius:10px;
+  border:1px solid #2a3648; background:#0f1216; color:#e9eef5; font-weight:700;
 }
 .twTCBtn:hover{ border-color:#6aa0ff; }
 .twTCSmall{ font-size:11px; color:#9fb0c5; line-height:1.35; }
-.twTCKPI{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+.twTCKPI{ font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; }
 .twTCNote{
-  margin-top:10px;
-  background:#0f1216;
-  border:1px dashed #2a3648;
-  padding:10px;
-  border-radius:10px;
+  margin-top:10px; background:#0f1216; border:1px dashed #2a3648;
+  padding:10px; border-radius:10px;
 }
 .twTCOK{ color:#6ee7b7; font-weight:800; }
 .twTCBad{ color:#fb7185; font-weight:800; }
 a.twTCLink{ color:#9cc2ff; text-decoration:none; }
 a.twTCLink:hover{ text-decoration:underline; }
 `;
-
     $('head').append(`<style id="twTroopsCalcStyle">${css}</style>`);
 
-    // ---------- HTML ----------
+    // HTML
     const html = `
 <div id="twTroopsCalcOverlay">
   <div id="twTroopsCalcHeader">
@@ -169,11 +137,13 @@ a.twTCLink:hover{ text-decoration:underline; }
 
     <div class="twTCNote">
       <div class="twTCSmall">Resultado</div>
-      <div class="twTCKPI" id="twTC_out"></div>
+      <div class="twTCKPI" id="twTC_out">Preencha os dados e clique em Calcular.</div>
       <div class="twTCSmall" style="margin-top:8px;">
-        Referência: <a class="twTCLink" target="_blank" rel="noreferrer"
-        href="https://forum.tribalwars.com.br/index.php?threads/tropas-como-saber-a-quantidade-certa-de-tropas.128962/">
-        tópico no fórum</a>.
+        Referência:
+        <a class="twTCLink" target="_blank" rel="noreferrer"
+           href="https://forum.tribalwars.com.br/index.php?threads/tropas-como-saber-a-quantidade-certa-de-tropas.128962/">
+           tópico no fórum
+        </a>.
       </div>
     </div>
 
@@ -181,81 +151,61 @@ a.twTCLink:hover{ text-decoration:underline; }
       Obs.: Espiões não entram nessa conta (critério de “perfil militar”, não de utilidade tática).
     </div>
   </div>
-</div>
-`;
+</div>`;
     $('body').append(html);
 
-    // ---------- Drag ----------
+    // Drag
     (function enableDrag() {
       const box = document.getElementById('twTroopsCalcOverlay');
       const head = document.getElementById('twTroopsCalcHeader');
-      let startX = 0, startY = 0, startLeft = 0, startTop = 0, dragging = false;
+      let startX=0, startY=0, startLeft=0, startTop=0, dragging=false;
 
       head.addEventListener('mousedown', (e) => {
         dragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
+        startX = e.clientX; startY = e.clientY;
         const rect = box.getBoundingClientRect();
-        startLeft = rect.left;
-        startTop = rect.top;
+        startLeft = rect.left; startTop = rect.top;
         e.preventDefault();
       });
-
       window.addEventListener('mousemove', (e) => {
         if (!dragging) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        box.style.left = (startLeft + dx) + 'px';
-        box.style.top = (startTop + dy) + 'px';
+        box.style.left = (startLeft + (e.clientX - startX)) + 'px';
+        box.style.top  = (startTop  + (e.clientY - startY)) + 'px';
       });
-
-      window.addEventListener('mouseup', () => dragging = false);
+      window.addEventListener('mouseup', () => dragging=false);
     })();
 
-    // ---------- UI Logic ----------
     function readData() {
       const arch = $('#twTC_archers').is(':checked');
-
-      const data = {
+      return {
         p: parseBRInt($('#twTC_p').val()),
         rule: parseInt($('#twTC_rule').val(), 10),
-        arch: arch,
-
+        arch,
         Lc: parseBRInt($('#twTC_Lc').val()),
         Ep: parseBRInt($('#twTC_Ep').val()),
         Bb: parseBRInt($('#twTC_Bb').val()),
-
         Cl: parseBRInt($('#twTC_Cl').val()),
         Cp: parseBRInt($('#twTC_Cp').val()),
         Ar: parseBRInt($('#twTC_Ar').val()),
         Ct: parseBRInt($('#twTC_Ct').val()),
         Pl: parseBRInt($('#twTC_Pl').val()),
-
         Aq: arch ? parseBRInt($('#twTC_Aq').val()) : 0,
         Ac: arch ? parseBRInt($('#twTC_Ac').val()) : 0
       };
-      return data;
     }
 
     function calcT(d) {
-      // pesos do tópico:
-      // Lc, Ep, Bb, Aq => 1
-      // Cl*4, Ac*5, Cp*6, Ar*5, Ct*8, Pl*10
-      const t =
-        d.Lc + d.Ep + d.Bb + (d.arch ? d.Aq : 0) +
-        (d.Cl * 4) + (d.arch ? (d.Ac * 5) : 0) +
-        (d.Cp * 6) + (d.Ar * 5) + (d.Ct * 8) + (d.Pl * 10);
-      return t;
+      return d.Lc + d.Ep + d.Bb + (d.arch ? d.Aq : 0)
+        + (d.Cl * 4) + (d.arch ? (d.Ac * 5) : 0)
+        + (d.Cp * 6) + (d.Ar * 5) + (d.Ct * 8) + (d.Pl * 10);
     }
 
     function render() {
       const d = readData();
-
       if (!d.p || d.p <= 0) {
         $('#twTC_out').html(`<span class="twTCBad">Preencha seus pontos (p)</span> para calcular.`);
         return;
       }
-
       const t = calcT(d);
       const M = d.rule * d.p;
       const diff = t - M;
@@ -291,7 +241,6 @@ a.twTCLink:hover{ text-decoration:underline; }
       `);
     }
 
-    // Show/hide archer fields
     function syncArcherFields() {
       const arch = $('#twTC_archers').is(':checked');
       $('#twTC_AqWrap').toggle(arch);
@@ -299,17 +248,15 @@ a.twTCLink:hover{ text-decoration:underline; }
       render();
     }
 
-    // ---------- Events ----------
+    // events
     $('#twTroopsCalcClose').on('click', () => $('#twTroopsCalcOverlay, #twTroopsCalcStyle').remove());
     $('#twTC_calc').on('click', render);
     $('#twTC_archers').on('change', syncArcherFields);
 
-    // Atualiza ao digitar (se já tiver pontos)
     $('#twTroopsCalcOverlay input, #twTroopsCalcOverlay select').on('input', function () {
       if (parseBRInt($('#twTC_p').val()) > 0) render();
     });
 
-    // Preencher exemplo (seu caso)
     $('#twTC_fillExample').on('click', function () {
       $('#twTC_p').val('43.079');
       $('#twTC_rule').val('2');
@@ -326,8 +273,6 @@ a.twTCLink:hover{ text-decoration:underline; }
       render();
     });
 
-    // Estado inicial
     syncArcherFields();
-    $('#twTC_out').html('Preencha os dados e clique em <b>Calcular</b>.');
   });
 })();
