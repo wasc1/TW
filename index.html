@@ -16,7 +16,6 @@
       --ok:#6ee7b7;
       --bad:#fb7185;
       --link:#9cc2ff;
-      --head:#202225;
       --shadow: 0 12px 30px rgba(0,0,0,.35);
       --radius:14px;
     }
@@ -28,18 +27,9 @@
       color: var(--text);
     }
     .wrap{max-width:1080px;margin:0 auto;padding:22px 16px 60px;}
-    header{
-      display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;
-      margin-bottom:14px;
-    }
+    header{margin-bottom:14px;}
     h1{margin:0;font-size:20px}
     .subtitle{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
-    .pill{
-      border:1px solid var(--border2);
-      background: rgba(255,255,255,.02);
-      color: var(--text);
-      padding:6px 10px;border-radius:999px;font-size:12px;
-    }
     .grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:14px;margin-top:14px;}
     @media (max-width: 920px){ .grid{grid-template-columns:1fr;} }
     .card{
@@ -57,7 +47,7 @@
       .row, .row3{grid-template-columns:1fr;}
     }
     label{display:block;color:var(--muted);font-size:12px;margin:0 0 6px;}
-    input, select{
+    input{
       width:100%;
       background: var(--card2);
       border:1px solid var(--border2);
@@ -66,8 +56,7 @@
       color: var(--text);
       outline:none;
     }
-    input:focus, select:focus{border-color:var(--link); box-shadow: 0 0 0 3px rgba(156,194,255,.15);}
-    .inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    input:focus{border-color:var(--link); box-shadow: 0 0 0 3px rgba(156,194,255,.15);}
     .check{
       display:flex;gap:8px;align-items:center;
       padding:10px;
@@ -128,23 +117,17 @@
 <body>
   <div class="wrap">
     <header>
-      <div>
-        <h1>Calculadora Tropas x Pontos — Tribal Wars</h1>
-        <div class="subtitle">
-          A página calcula <b>t</b> (tropas equivalentes) e compara com <b>M</b> (mínimo) definido automaticamente pela faixa de pontos:
-          <span class="smallcode">até 400</span> (início), <span class="smallcode">401–1499</span> (meio), <span class="smallcode">1500+</span> (fim).
-        </div>
-      </div>
-      <div class="inline">
-        <span class="pill">GitHub Pages</span>
-        <span class="pill" id="pillSaved">Preferências: —</span>
+      <h1>Calculadora Tropas x Pontos — Tribal Wars</h1>
+      <div class="subtitle">
+        A página calcula <b>t</b> (tropas equivalentes) e compara com <b>M</b> (mínimo) definido automaticamente pela faixa de pontos:
+        <span class="smallcode">até 400</span> (início), <span class="smallcode">401–1499</span> (meio), <span class="smallcode">1500+</span> (fim).
       </div>
     </header>
 
     <div class="grid">
       <!-- INPUTS -->
       <div class="card">
-        <h2>1) Entrada</h2>
+        <h2>Entrada</h2>
 
         <div class="row">
           <div>
@@ -175,7 +158,7 @@
 
         <hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">
 
-        <h2>2) Tropas</h2>
+        <h2>Tropas</h2>
 
         <div class="row3">
           <div>
@@ -241,7 +224,7 @@
 
       <!-- RESULTADOS + EXPLICAÇÃO -->
       <div class="card">
-        <h2>3) Resultado</h2>
+        <h2>Resultado</h2>
         <div class="muted">
           A página calcula <b>t</b> (tropas equivalentes) e compara com <b>M</b> (mínimo pela fase detectada).
         </div>
@@ -252,7 +235,7 @@
           <summary>Entenda o cálculo <span class="badge">resumo</span></summary>
 
           <div class="muted" style="margin-top:10px">
-            A fórmula soma tropas com “pesos” e gera <b>t</b>:
+            Fórmula usada:
           </div>
 
           <div class="kpi" id="formulaBox" style="margin-top:10px"></div>
@@ -264,7 +247,6 @@
               <li><b>Meio (401 ≤ p ≤ 1499):</b> M = 1,5×p</li>
               <li><b>Fim (p ≥ 1500):</b> M = 2×p</li>
             </ul>
-            Isso é uma régua de “perfil militar” para tribo — não mede habilidade, só ajuda a comparar pontos x tropa.
           </div>
 
           <div class="muted" style="margin-top:10px">
@@ -287,12 +269,12 @@
     </div>
 
     <footer>
-      Feito para uso em navegador (GitHub Pages). Compartilhe o link com a tribo.
+      Compartilhe o link com a tribo.
     </footer>
   </div>
 
   <script>
-    const LS_KEY = "tw_tropas_calc_pages_v2";
+    const LS_KEY = "tw_tropas_calc_pages_v3";
 
     function parseBRInt(v){
       if(v === null || v === undefined) return 0;
@@ -327,10 +309,6 @@
         : "t = Lc + Ep + Bb + (Cl×4) + (Cp×6) + (Ar×5) + (Ct×8) + (Pl×10)";
     }
 
-    // Regras por pontos (com base no texto que você trouxe):
-    // p <= 400  => inicio  => M = 1.0*p
-    // 401-1499  => meio   => M = 1.5*p
-    // p >= 1500 => fim    => M = 2.0*p
     function phaseByPoints(p){
       if(!p || p <= 0) return { phase:"—", mult:0, label:"—" };
       if(p <= 400) return { phase:"Início", mult:1.0, label:"M = 1×p (p ≤ 400)" };
@@ -369,10 +347,6 @@
       document.getElementById("formulaBox").textContent = formulaText(tem);
 
       savePrefs({ temArqueiro: tem });
-
-      document.getElementById("pillSaved").textContent =
-        `Preferências: arqueiros ${tem ? "sim" : "não"}`;
-
       render();
     }
 
@@ -423,7 +397,6 @@
       const prefs = loadPrefs();
       document.getElementById("temArqueiro").checked = prefs.temArqueiro;
 
-      // listeners
       const watch = ["pontos","Lc","Ep","Bb","Cl","Cp","Ar","Ct","Pl","Aq","Ac"];
       watch.forEach(id => {
         const el = document.getElementById(id);
@@ -434,7 +407,6 @@
 
       document.getElementById("temArqueiro").addEventListener("change", syncUI);
 
-      // initial render
       document.getElementById("formulaBox").textContent =
         formulaText(document.getElementById("temArqueiro").checked);
 
