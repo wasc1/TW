@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculadora de Tropas (Tropas x Pontos) - Tribal Wars</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 18px; background:#0f1216; color:#e9eef5; }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    h1 { margin: 0 0 10px; font-size: 20px; }
+    p { margin: 6px 0; color:#c7d0dd; }
+    .card { background:#161b22; border:1px solid #263040; border-radius: 10px; padding: 14px; margin: 12px 0; }
+    .grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    label { font-size: 12px; color:#c7d0dd; display:block; margin-bottom: 6px; }
+    input, select { width:100%; box-sizing:border-box; padding:10px; border-radius: 8px; border:1px solid #2a3648; background:#0f1216; color:#e9eef5; }
+    input:focus, select:focus { outline: 2px solid #6aa0ff33; border-color:#6aa0ff; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .btn { cursor:pointer; padding:10px 12px; border-radius: 10px; border:1px solid #2a3648; background:#0f1216; color:#e9eef5; }
+    .btn:hover { border-color:#6aa0ff; }
+    .muted { color:#9fb0c5; font-size: 12px; }
+    .ok { color:#6ee7b7; font-weight: 700; }
+    .bad { color:#fb7185; font-weight: 700; }
+    .kpi { font-size: 26px; font-weight: 800; margin: 6px 0; }
+    .kpi small { font-size: 12px; color:#9fb0c5; font-weight: 600; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    hr { border:none; border-top:1px solid #263040; margin: 12px 0; }
+    footer { margin-top: 14px; font-size: 12px; color:#9fb0c5; }
+    a { color:#9cc2ff; }
+    .note { background:#0f1216; border:1px dashed #2a3648; padding:10px; border-radius:10px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Calculadora de Tropas (t) x Pontos (p) — Tribal Wars</h1>
+    <p>Baseada na ideia do tópico do fórum (com ajuste para mundos sem arqueiros). Preencha os dados e veja se você está no mínimo recomendado.</p>
+
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <label>Pontos do jogador (p)</label>
+          <input id="pontos" inputmode="numeric" placeholder="Ex.: 43079" value="">
+        </div>
+        <div>
+          <label>Regra de mínimo (M)</label>
+          <select id="regraMinimo">
+            <option value="1">M = p (t ≥ p)</option>
+            <option value="2" selected>M = 2p (t ≥ 2p) — late game</option>
+          </select>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="row">
+        <label style="margin:0; display:flex; gap:8px; align-items:center;">
+          <input id="temArqueiros" type="checkbox" style="width:auto">
+          Mundo tem arqueiros (Aq e Ac)
+        </label>
+
+        <button class="btn" id="btnExemplo">Preencher exemplo (seu caso)</button>
+        <button class="btn" id="btnLimpar">Limpar</button>
+      </div>
+
+      <p class="muted">Dica: você pode colar números com ponto/vírgula (ex.: 43.079 ou 43,079) que a calculadora interpreta.</p>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px; font-size:16px;">Tropas</h2>
+      <div class="grid">
+        <div>
+          <label>Lanceiros (Lc)</label>
+          <input id="Lc" inputmode="numeric" placeholder="0">
+        </div>
+        <div>
+          <label>Espadachins (Ep)</label>
+          <input id="Ep" inputmode="numeric" placeholder="0">
+        </div>
+        <div>
+          <label>Bárbaros / Berserker (Bb)</label>
+          <input id="Bb" inputmode="numeric" placeholder="0">
+        </div>
+        <div>
+          <label>Paladinos (Pl)</label>
+          <input id="Pl" inputmode="numeric" placeholder="0">
+        </div>
+
+        <div>
+          <label>Cavaleiro Leve (Cl)</label>
+          <input id="Cl" inputmode="numeric" placeholder="0">
+        </div>
+        <div>
+          <label>Cavaleiro Pesado (Cp)</label>
+          <input id="Cp" inputmode="numeric" placeholder="0">
+        </div>
+        <div>
+          <label>Aríetes (Ar)</label>
+          <input id="Ar" inputmode="numeric" placeholder="0">
+        </div>
+        <div>
+          <label>Catapultas (Ct)</label>
+          <input id="Ct" inputmode="numeric" placeholder="0">
+        </div>
+
+        <div id="rowAq" style="display:none;">
+          <label>Arqueiros (Aq)</label>
+          <input id="Aq" inputmode="numeric" placeholder="0">
+        </div>
+        <div id="rowAc" style="display:none;">
+          <label>Arqueiros a cavalo (Ac)</label>
+          <input id="Ac" inputmode="numeric" placeholder="0">
+        </div>
+      </div>
+
+      <hr>
+      <div class="row">
+        <button class="btn" id="btnCalcular">Calcular</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px; font-size:16px;">Resultado</h2>
+
+      <div class="grid-2">
+        <div class="note">
+          <div class="muted">t (tropas equivalentes)</div>
+          <div id="outT" class="kpi mono">—</div>
+          <div class="muted">Fórmula:
+            <span id="formulaTexto" class="mono"></span>
+          </div>
+        </div>
+        <div class="note">
+          <div class="muted">M (mínimo) e diferença</div>
+          <div id="outM" class="kpi mono">—</div>
+          <div id="outDiff" class="mono"></div>
+          <div class="muted">Razão: <span id="outRatio" class="mono">—</span></div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="note">
+        <div class="muted">Equivalência do “quanto falta” (aprox.)</div>
+        <div id="outSug" class="mono">—</div>
+        <p class="muted" style="margin-top:10px;">
+          Observação: espiões não entram nesse cálculo (é um critério de “perfil militar”, não de utilidade tática).
+        </p>
+      </div>
+    </div>
+
+    <footer>
+      Referência (ideia original): 
+      <a href="https://forum.tribalwars.com.br/index.php?threads/tropas-como-saber-a-quantidade-certa-de-tropas.128962/" target="_blank" rel="noreferrer">
+        Tópico no fórum do Tribal Wars BR
+      </a>
+    </footer>
+  </div>
+
+<script>
+  function parseBRNumber(v) {
+    // aceita "43.079", "43,079", "43079", " 43 079 "
+    if (v === null || v === undefined) return 0;
+    const s = String(v).trim();
+    if (!s) return 0;
+    // remove espaços
+    let x = s.replace(/\s+/g, '');
+    // se tiver tanto '.' quanto ',', assume '.' milhar e ',' decimal (mas aqui queremos inteiro)
+    // então removemos tudo que não é dígito
+    x = x.replace(/[^\d]/g, '');
+    return x ? parseInt(x, 10) : 0;
+  }
+
+  function fmtInt(n) {
+    return (n ?? 0).toLocaleString('pt-BR');
+  }
+
+  function ceilDiv(a, b) {
+    return Math.ceil(a / b);
+  }
+
+  function getInputs(temArq) {
+    const data = {
+      p: parseBRNumber(document.getElementById('pontos').value),
+      Lc: parseBRNumber(document.getElementById('Lc').value),
+      Ep: parseBRNumber(document.getElementById('Ep').value),
+      Bb: parseBRNumber(document.getElementById('Bb').value),
+      Cl: parseBRNumber(document.getElementById('Cl').value),
+      Cp: parseBRNumber(document.getElementById('Cp').value),
+      Ar: parseBRNumber(document.getElementById('Ar').value),
+      Ct: parseBRNumber(document.getElementById('Ct').value),
+      Pl: parseBRNumber(document.getElementById('Pl').value),
+      Aq: temArq ? parseBRNumber(document.getElementById('Aq').value) : 0,
+      Ac: temArq ? parseBRNumber(document.getElementById('Ac').value) : 0
+    };
+    return data;
+  }
+
+  function calcT(data, temArq) {
+    // pesos do tópico
+    // infantaria = 1
+    // Cl*4, Ac*5, Cp*6, Ar*5, Ct*8, Pl*10
+    const t =
+      data.Lc +
+      data.Ep +
+      data.Bb +
+      (temArq ? data.Aq : 0) +
+      (data.Cl * 4) +
+      (temArq ? (data.Ac * 5) : 0) +
+      (data.Cp * 6) +
+      (data.Ar * 5) +
+      (data.Ct * 8) +
+      (data.Pl * 10);
+
+    return t;
+  }
+
+  function formulaText(temArq) {
+    if (temArq) {
+      return "t = Lc + Ep + Bb + Aq + (Cl*4) + (Ac*5) + (Cp*6) + (Ar*5) + (Ct*8) + (Pl*10)";
+    }
+    return "t = Lc + Ep + Bb + (Cl*4) + (Cp*6) + (Ar*5) + (Ct*8) + (Pl*10)";
+  }
+
+  function render() {
+    const temArq = document.getElementById('temArqueiros').checked;
+    document.getElementById('rowAq').style.display = temArq ? '' : 'none';
+    document.getElementById('rowAc').style.display = temArq ? '' : 'none';
+
+    const regra = parseInt(document.getElementById('regraMinimo').value, 10);
+    const data = getInputs(temArq);
+
+    if (!data.p || data.p <= 0) {
+      document.getElementById('status').textContent = "Preencha seus pontos (p) para calcular.";
+      return;
+    }
+
+    const t = calcT(data, temArq);
+    const M = regra * data.p; // M = p ou 2p
+    const diff = t - M;       // positivo = acima, negativo = faltando
+    const ratio = (t / data.p);
+
+    document.getElementById('formulaTexto').textContent = formulaText(temArq);
+    document.getElementById('outT').textContent = fmtInt(t);
+    document.getElementById('outM').textContent = fmtInt(M);
+
+    if (diff >= 0) {
+      document.getElementById('outDiff').innerHTML =
+        `<span class="ok">OK</span> — você está <span class="ok">${fmtInt(diff)}</span> acima do mínimo.`;
+    } else {
+      document.getElementById('outDiff').innerHTML =
+        `<span class="bad">FALTANDO</span> — faltam <span class="bad">${fmtInt(Math.abs(diff))}</span> tropas equivalentes para bater o mínimo.`;
+    }
+
+    document.getElementById('outRatio').textContent = ratio.toFixed(2);
+
+    // Sugestões equivalentes (se estiver faltando)
+    if (diff >= 0) {
+      document.getElementById('outSug').textContent = "Você já bateu o mínimo. Se quiser subir a régua, aumente a regra para 2p e/ou foque em tropas com maior peso (CL/CP/Ar/Ct).";
+    } else {
+      const falta = Math.abs(diff);
+      const sug = [
+        `Para cobrir ${fmtInt(falta)} equivalentes, você precisaria de aproximadamente:`,
+        `• ${fmtInt(ceilDiv(falta, 4))} CL (peso 4)`,
+        `• ${fmtInt(ceilDiv(falta, 6))} CP (peso 6)`,
+        `• ${fmtInt(ceilDiv(falta, 5))} Aríetes (peso 5)`,
+        `• ${fmtInt(ceilDiv(falta, 8))} Catapultas (peso 8)`,
+      ];
+      if (temArq) sug.push(`• ${fmtInt(ceilDiv(falta, 5))} Arqueiros a cavalo (Ac, peso 5)`);
+      document.getElementById('outSug').textContent = sug.join("\n");
+    }
+
+    document.getElementById('status').textContent = "Cálculo atualizado.";
+  }
+
+  // Botões
+  document.getElementById('btnCalcular').addEventListener('click', render);
+
+  document.getElementById('btnLimpar').addEventListener('click', () => {
+    const ids = ['pontos','Lc','Ep','Bb','Cl','Cp','Ar','Ct','Pl','Aq','Ac'];
+    ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('regraMinimo').value = '2';
+    document.getElementById('temArqueiros').checked = false;
+    document.getElementById('rowAq').style.display = 'none';
+    document.getElementById('rowAc').style.display = 'none';
+    document.getElementById('outT').textContent = '—';
+    document.getElementById('outM').textContent = '—';
+    document.getElementById('outDiff').textContent = '';
+    document.getElementById('outRatio').textContent = '—';
+    document.getElementById('outSug').textContent = '—';
+    document.getElementById('status').textContent = 'Limpo.';
+  });
+
+  document.getElementById('btnExemplo').addEventListener('click', () => {
+    // Seu exemplo real
+    document.getElementById('pontos').value = '43.079';
+    document.getElementById('temArqueiros').checked = false;
+    document.getElementById('Lc').value = '9942';
+    document.getElementById('Ep').value = '7127';
+    document.getElementById('Bb').value = '7616';
+    document.getElementById('Cl').value = '4587';
+    document.getElementById('Cp').value = '608';
+    document.getElementById('Ar').value = '556';
+    document.getElementById('Ct').value = '182';
+    document.getElementById('Pl').value = '3';
+    render();
+  });
+
+  // Atualiza ao digitar
+  const watchIds = ['pontos','Lc','Ep','Bb','Cl','Cp','Ar','Ct','Pl','Aq','Ac','regraMinimo','temArqueiros'];
+  watchIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => {
+      // não fica recalculando sem pontos
+      if (id === 'temArqueiros') {
+        // mostra/esconde campos
+        document.getElementById('rowAq').style.display = el.checked ? '' : 'none';
+        document.getElementById('rowAc').style.display = el.checked ? '' : 'none';
+      }
+      // recalcula se já tem pontos
+      if (parseBRNumber(document.getElementById('pontos').value) > 0) render();
+    });
+  });
+
+  // Estado inicial
+  document.getElementById('formulaTexto').textContent = formulaText(false);
+  document.getElementById('status').textContent = 'Preencha seus pontos e tropas e clique em Calcular.';
+</script>
+</body>
+</html>
