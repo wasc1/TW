@@ -3,328 +3,556 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Calculadora de Tropas (Tropas x Pontos) - Tribal Wars</title>
+  <title>Calculadora Tropas x Pontos (Tribal Wars)</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 18px; background:#0f1216; color:#e9eef5; }
-    .wrap { max-width: 980px; margin: 0 auto; }
-    h1 { margin: 0 0 10px; font-size: 20px; }
-    p { margin: 6px 0; color:#c7d0dd; }
-    .card { background:#161b22; border:1px solid #263040; border-radius: 10px; padding: 14px; margin: 12px 0; }
-    .grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    label { font-size: 12px; color:#c7d0dd; display:block; margin-bottom: 6px; }
-    input, select { width:100%; box-sizing:border-box; padding:10px; border-radius: 8px; border:1px solid #2a3648; background:#0f1216; color:#e9eef5; }
-    input:focus, select:focus { outline: 2px solid #6aa0ff33; border-color:#6aa0ff; }
-    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .btn { cursor:pointer; padding:10px 12px; border-radius: 10px; border:1px solid #2a3648; background:#0f1216; color:#e9eef5; }
-    .btn:hover { border-color:#6aa0ff; }
-    .muted { color:#9fb0c5; font-size: 12px; }
-    .ok { color:#6ee7b7; font-weight: 700; }
-    .bad { color:#fb7185; font-weight: 700; }
-    .kpi { font-size: 26px; font-weight: 800; margin: 6px 0; }
-    .kpi small { font-size: 12px; color:#9fb0c5; font-weight: 600; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    hr { border:none; border-top:1px solid #263040; margin: 12px 0; }
-    footer { margin-top: 14px; font-size: 12px; color:#9fb0c5; }
-    a { color:#9cc2ff; }
-    .note { background:#0f1216; border:1px dashed #2a3648; padding:10px; border-radius:10px; }
+    :root{
+      --bg:#0f1216;
+      --card:#161b22;
+      --card2:#0f1216;
+      --border:#263040;
+      --border2:#2a3648;
+      --text:#e9eef5;
+      --muted:#9fb0c5;
+      --ok:#6ee7b7;
+      --bad:#fb7185;
+      --link:#9cc2ff;
+      --head:#202225;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, #18202b 0%, var(--bg) 55%) no-repeat, var(--bg);
+      color: var(--text);
+    }
+    .wrap{max-width:1080px;margin:0 auto;padding:22px 16px 60px;}
+    header{
+      display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;
+      margin-bottom:14px;
+    }
+    h1{margin:0;font-size:20px}
+    .subtitle{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
+    .pill{
+      border:1px solid var(--border2);
+      background: rgba(255,255,255,.02);
+      color: var(--text);
+      padding:6px 10px;border-radius:999px;font-size:12px;
+    }
+    .grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:14px;margin-top:14px;}
+    @media (max-width: 920px){ .grid{grid-template-columns:1fr;} }
+    .card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:14px;
+      box-shadow: var(--shadow);
+    }
+    .card h2{margin:0 0 10px;font-size:15px}
+    .muted{color:var(--muted);font-size:12px;line-height:1.35}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:10px 0;}
+    @media (max-width: 600px){
+      .row, .row3{grid-template-columns:1fr;}
+    }
+    label{display:block;color:var(--muted);font-size:12px;margin:0 0 6px;}
+    input, select, button, textarea{
+      width:100%;
+      background: var(--card2);
+      border:1px solid var(--border2);
+      border-radius: 10px;
+      padding:10px 10px;
+      color: var(--text);
+      outline:none;
+    }
+    input:focus, select:focus, textarea:focus{border-color:var(--link); box-shadow: 0 0 0 3px rgba(156,194,255,.15);}
+    .inline{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    }
+    .check{
+      display:flex;gap:8px;align-items:center;
+      padding:10px;
+      border:1px dashed var(--border2);
+      border-radius:12px;
+      background: rgba(0,0,0,.15);
+    }
+    .check input{width:auto}
+    .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+    button{
+      cursor:pointer;
+      font-weight:800;
+    }
+    button:hover{border-color:var(--link)}
+    .btn-secondary{font-weight:700;opacity:.9}
+    .kpi{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      background: rgba(0,0,0,.2);
+      border: 1px dashed var(--border2);
+      border-radius: 12px;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-top:10px;
+    }
+    .ok{color:var(--ok);font-weight:900}
+    .bad{color:var(--bad);font-weight:900}
+    a{color:var(--link);text-decoration:none}
+    a:hover{text-decoration:underline}
+    details{
+      margin-top:12px;
+      border:1px solid var(--border2);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.18);
+    }
+    summary{cursor:pointer;font-weight:800}
+    .badge{
+      display:inline-block;
+      margin-left:8px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border2);
+      font-size:11px;
+      color:var(--muted);
+      vertical-align:middle;
+    }
+    footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+      text-align:center;
+    }
+    .smallcode{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;}
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 920px){ .split{grid-template-columns:1fr;} }
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <h1>Calculadora de Tropas (t) x Pontos (p) — Tribal Wars</h1>
-    <p>Baseada na ideia do tópico do fórum (com ajuste para mundos sem arqueiros). Preencha os dados e veja se você está no mínimo recomendado.</p>
-
-    <div class="card">
-      <div class="grid-2">
-        <div>
-          <label>Pontos do jogador (p)</label>
-          <input id="pontos" inputmode="numeric" placeholder="Ex.: 43079" value="">
-        </div>
-        <div>
-          <label>Regra de mínimo (M)</label>
-          <select id="regraMinimo">
-            <option value="1">M = p (t ≥ p)</option>
-            <option value="2" selected>M = 2p (t ≥ 2p) — late game</option>
-          </select>
+    <header>
+      <div>
+        <h1>Calculadora Tropas x Pontos — Tribal Wars</h1>
+        <div class="subtitle">
+          Um “termômetro” para comparar <b>perfil militar</b> (tropas equivalentes) com <b>pontos</b> usando pesos por tipo de tropa.
+          Configure de acordo com a fase do jogo e se o mundo tem arqueiros.
         </div>
       </div>
-
-      <hr>
-
-      <div class="row">
-        <label style="margin:0; display:flex; gap:8px; align-items:center;">
-          <input id="temArqueiros" type="checkbox" style="width:auto">
-          Mundo tem arqueiros (Aq e Ac)
-        </label>
-
-        <button class="btn" id="btnExemplo">Preencher exemplo (seu caso)</button>
-        <button class="btn" id="btnLimpar">Limpar</button>
+      <div class="inline">
+        <span class="pill">GitHub Pages</span>
+        <span class="pill" id="pillSaved">Preferências: —</span>
       </div>
+    </header>
 
-      <p class="muted">Dica: você pode colar números com ponto/vírgula (ex.: 43.079 ou 43,079) que a calculadora interpreta.</p>
-    </div>
+    <div class="grid">
+      <!-- CONFIG + INPUTS -->
+      <div class="card">
+        <h2>1) Configurações</h2>
 
-    <div class="card">
-      <h2 style="margin:0 0 10px; font-size:16px;">Tropas</h2>
-      <div class="grid">
-        <div>
-          <label>Lanceiros (Lc)</label>
-          <input id="Lc" inputmode="numeric" placeholder="0">
-        </div>
-        <div>
-          <label>Espadachins (Ep)</label>
-          <input id="Ep" inputmode="numeric" placeholder="0">
-        </div>
-        <div>
-          <label>Bárbaros / Berserker (Bb)</label>
-          <input id="Bb" inputmode="numeric" placeholder="0">
-        </div>
-        <div>
-          <label>Paladinos (Pl)</label>
-          <input id="Pl" inputmode="numeric" placeholder="0">
-        </div>
+        <div class="row">
+          <div>
+            <label>Pontos do jogador (p)</label>
+            <input id="pontos" inputmode="numeric" placeholder="Ex.: 43079">
+            <div class="muted">Aceita <span class="smallcode">43.079</span>, <span class="smallcode">43 079</span> ou <span class="smallcode">43079</span>.</div>
+          </div>
 
-        <div>
-          <label>Cavaleiro Leve (Cl)</label>
-          <input id="Cl" inputmode="numeric" placeholder="0">
-        </div>
-        <div>
-          <label>Cavaleiro Pesado (Cp)</label>
-          <input id="Cp" inputmode="numeric" placeholder="0">
-        </div>
-        <div>
-          <label>Aríetes (Ar)</label>
-          <input id="Ar" inputmode="numeric" placeholder="0">
-        </div>
-        <div>
-          <label>Catapultas (Ct)</label>
-          <input id="Ct" inputmode="numeric" placeholder="0">
-        </div>
-
-        <div id="rowAq" style="display:none;">
-          <label>Arqueiros (Aq)</label>
-          <input id="Aq" inputmode="numeric" placeholder="0">
-        </div>
-        <div id="rowAc" style="display:none;">
-          <label>Arqueiros a cavalo (Ac)</label>
-          <input id="Ac" inputmode="numeric" placeholder="0">
-        </div>
-      </div>
-
-      <hr>
-      <div class="row">
-        <button class="btn" id="btnCalcular">Calcular</button>
-        <span id="status" class="muted"></span>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 style="margin:0 0 10px; font-size:16px;">Resultado</h2>
-
-      <div class="grid-2">
-        <div class="note">
-          <div class="muted">t (tropas equivalentes)</div>
-          <div id="outT" class="kpi mono">—</div>
-          <div class="muted">Fórmula:
-            <span id="formulaTexto" class="mono"></span>
+          <div>
+            <label>Fase do jogo (define o mínimo M)</label>
+            <select id="fase">
+              <option value="early">Início: M = 1 × p</option>
+              <option value="mid">Meio: M = 1,5 × p</option>
+              <option value="late" selected>Fim: M = 2 × p</option>
+              <option value="custom">Custom: M = (multiplicador) × p</option>
+            </select>
           </div>
         </div>
-        <div class="note">
-          <div class="muted">M (mínimo) e diferença</div>
-          <div id="outM" class="kpi mono">—</div>
-          <div id="outDiff" class="mono"></div>
-          <div class="muted">Razão: <span id="outRatio" class="mono">—</span></div>
+
+        <div class="row">
+          <div>
+            <label>Multiplicador (apenas “Custom”)</label>
+            <input id="mult" placeholder="Ex.: 1,8" disabled>
+            <div class="muted">Use vírgula ou ponto (ex.: <span class="smallcode">1,8</span>).</div>
+          </div>
+
+          <div class="check">
+            <input id="temArqueiro" type="checkbox">
+            <div>
+              <div style="font-weight:800">Mundo tem arqueiros</div>
+              <div class="muted">Se desligado, Aq e Ac não entram no cálculo.</div>
+            </div>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">
+
+        <h2>2) Tropas</h2>
+
+        <div class="row3">
+          <div>
+            <label>Lanceiros (Lc)</label>
+            <input id="Lc" inputmode="numeric" placeholder="0">
+          </div>
+          <div>
+            <label>Espadachins (Ep)</label>
+            <input id="Ep" inputmode="numeric" placeholder="0">
+          </div>
+          <div>
+            <label>Bárbaros / Berserker (Bb)</label>
+            <input id="Bb" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+
+        <div class="row3">
+          <div>
+            <label>Cavaleiro Leve (Cl)</label>
+            <input id="Cl" inputmode="numeric" placeholder="0">
+          </div>
+          <div>
+            <label>Cavaleiro Pesado (Cp)</label>
+            <input id="Cp" inputmode="numeric" placeholder="0">
+          </div>
+          <div>
+            <label>Aríetes (Ar)</label>
+            <input id="Ar" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+
+        <div class="row3">
+          <div>
+            <label>Catapultas (Ct)</label>
+            <input id="Ct" inputmode="numeric" placeholder="0">
+          </div>
+
+          <div id="wrapAq" style="display:none;">
+            <label>Arqueiros (Aq)</label>
+            <input id="Aq" inputmode="numeric" placeholder="0">
+          </div>
+
+          <div id="wrapAc" style="display:none;">
+            <label>Arqueiros a cavalo (Ac)</label>
+            <input id="Ac" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Paladinos (Pl)</label>
+            <input id="Pl" inputmode="numeric" placeholder="0">
+            <div class="muted">O modelo usa peso 10 para Pl (só entra se você quiser contar).</div>
+          </div>
+          <div>
+            <label>Observação</label>
+            <div class="muted" style="padding:10px;border:1px dashed var(--border2);border-radius:12px;background:rgba(0,0,0,.15)">
+              Espiões normalmente <b>não entram</b> no cálculo (é uma métrica de “volume militar”, não de utilidade tática).
+            </div>
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <button id="btnCalc">Calcular</button>
+          <button id="btnExemplo" class="btn-secondary">Carregar exemplo (seu caso)</button>
+          <button id="btnLimpar" class="btn-secondary">Limpar</button>
+        </div>
+
+        <div class="muted" style="margin-top:10px">
+          Preferências (fase/arqueiros/multiplicador) são salvas no seu navegador.
         </div>
       </div>
 
-      <hr>
+      <!-- RESULTADOS + EXPLICAÇÃO -->
+      <div class="card">
+        <h2>3) Resultado</h2>
+        <div class="muted">
+          O cálculo gera <b>t</b> (tropas equivalentes) e compara com <b>M</b> (mínimo pela fase escolhida).
+        </div>
 
-      <div class="note">
-        <div class="muted">Equivalência do “quanto falta” (aprox.)</div>
-        <div id="outSug" class="mono">—</div>
-        <p class="muted" style="margin-top:10px;">
-          Observação: espiões não entram nesse cálculo (é um critério de “perfil militar”, não de utilidade tática).
-        </p>
+        <div class="kpi" id="out">Preencha os dados e clique em “Calcular”.</div>
+
+        <details open>
+          <summary>Entenda o cálculo <span class="badge">resumo</span></summary>
+
+          <div class="muted" style="margin-top:10px">
+            Essa métrica cria um número único (<b>t</b>) somando tropas com “pesos” para refletir impacto/custo aproximado.
+            A fórmula base é:
+          </div>
+
+          <div class="kpi" id="formulaBox" style="margin-top:10px"></div>
+
+          <div class="muted" style="margin-top:10px">
+            Depois você escolhe a fase e define o mínimo <b>M</b>:
+            <ul>
+              <li><b>Início:</b> M = 1×p (t ≥ p)</li>
+              <li><b>Meio:</b> M = 1,5×p</li>
+              <li><b>Fim:</b> M = 2×p</li>
+              <li><b>Custom:</b> M = (multiplicador)×p</li>
+            </ul>
+            Isso não “prova” quem joga melhor — apenas ajuda a detectar quem está com muitos pontos e pouca tropa para o nível desejado.
+          </div>
+
+          <div class="muted" style="margin-top:10px">
+            Referência conceitual (tópico do fórum): 
+            <a target="_blank" rel="noreferrer"
+               href="https://forum.tribalwars.com.br/index.php?threads/tropas-como-saber-a-quantidade-certa-de-tropas.128962/">
+               Tropas: como saber a quantidade certa de tropas
+            </a>
+          </div>
+        </details>
+
+        <details>
+          <summary>Como usar na tribo <span class="badge">dica</span></summary>
+          <div class="muted" style="margin-top:10px">
+            Você pode padronizar uma “régua” interna (ex.: meio = 1,5×p; fim = 2×p) e pedir para os membros colarem os dados aqui.
+            Se quiser, você também pode acrescentar no fórum da tribo:
+            <ul>
+              <li>qual fase deve ser usada</li>
+              <li>se o mundo tem arqueiros</li>
+              <li>e um “mínimo aceitável” para quem está em evolução</li>
+            </ul>
+          </div>
+        </details>
+
+        <div class="split" style="margin-top:12px">
+          <div class="muted" style="padding:10px;border:1px solid var(--border2);border-radius:12px;background:rgba(0,0,0,.18)">
+            <b>Nota:</b> se você quiser, dá para criar versões “padrão da tribo” com fase travada e layout com identidade da tribo.
+          </div>
+          <div class="muted" style="padding:10px;border:1px solid var(--border2);border-radius:12px;background:rgba(0,0,0,.18)">
+            <b>Transparência:</b> esta página não coleta dados — tudo fica local no navegador.
+          </div>
+        </div>
+
       </div>
     </div>
 
     <footer>
-      Referência (ideia original): 
-      <a href="https://forum.tribalwars.com.br/index.php?threads/tropas-como-saber-a-quantidade-certa-de-tropas.128962/" target="_blank" rel="noreferrer">
-        Tópico no fórum do Tribal Wars BR
-      </a>
+      Feito para uso em navegador (GitHub Pages).<br>
+      Você pode compartilhar este link com a tribo e usar como referência interna.
     </footer>
   </div>
 
-<script>
-  function parseBRNumber(v) {
-    // aceita "43.079", "43,079", "43079", " 43 079 "
-    if (v === null || v === undefined) return 0;
-    const s = String(v).trim();
-    if (!s) return 0;
-    // remove espaços
-    let x = s.replace(/\s+/g, '');
-    // se tiver tanto '.' quanto ',', assume '.' milhar e ',' decimal (mas aqui queremos inteiro)
-    // então removemos tudo que não é dígito
-    x = x.replace(/[^\d]/g, '');
-    return x ? parseInt(x, 10) : 0;
-  }
+  <script>
+    const LS_KEY = "tw_tropas_calc_pages_v1";
 
-  function fmtInt(n) {
-    return (n ?? 0).toLocaleString('pt-BR');
-  }
-
-  function ceilDiv(a, b) {
-    return Math.ceil(a / b);
-  }
-
-  function getInputs(temArq) {
-    const data = {
-      p: parseBRNumber(document.getElementById('pontos').value),
-      Lc: parseBRNumber(document.getElementById('Lc').value),
-      Ep: parseBRNumber(document.getElementById('Ep').value),
-      Bb: parseBRNumber(document.getElementById('Bb').value),
-      Cl: parseBRNumber(document.getElementById('Cl').value),
-      Cp: parseBRNumber(document.getElementById('Cp').value),
-      Ar: parseBRNumber(document.getElementById('Ar').value),
-      Ct: parseBRNumber(document.getElementById('Ct').value),
-      Pl: parseBRNumber(document.getElementById('Pl').value),
-      Aq: temArq ? parseBRNumber(document.getElementById('Aq').value) : 0,
-      Ac: temArq ? parseBRNumber(document.getElementById('Ac').value) : 0
-    };
-    return data;
-  }
-
-  function calcT(data, temArq) {
-    // pesos do tópico
-    // infantaria = 1
-    // Cl*4, Ac*5, Cp*6, Ar*5, Ct*8, Pl*10
-    const t =
-      data.Lc +
-      data.Ep +
-      data.Bb +
-      (temArq ? data.Aq : 0) +
-      (data.Cl * 4) +
-      (temArq ? (data.Ac * 5) : 0) +
-      (data.Cp * 6) +
-      (data.Ar * 5) +
-      (data.Ct * 8) +
-      (data.Pl * 10);
-
-    return t;
-  }
-
-  function formulaText(temArq) {
-    if (temArq) {
-      return "t = Lc + Ep + Bb + Aq + (Cl*4) + (Ac*5) + (Cp*6) + (Ar*5) + (Ct*8) + (Pl*10)";
-    }
-    return "t = Lc + Ep + Bb + (Cl*4) + (Cp*6) + (Ar*5) + (Ct*8) + (Pl*10)";
-  }
-
-  function render() {
-    const temArq = document.getElementById('temArqueiros').checked;
-    document.getElementById('rowAq').style.display = temArq ? '' : 'none';
-    document.getElementById('rowAc').style.display = temArq ? '' : 'none';
-
-    const regra = parseInt(document.getElementById('regraMinimo').value, 10);
-    const data = getInputs(temArq);
-
-    if (!data.p || data.p <= 0) {
-      document.getElementById('status').textContent = "Preencha seus pontos (p) para calcular.";
-      return;
+    function parseBRInt(v){
+      if(v === null || v === undefined) return 0;
+      let s = String(v).trim();
+      if(!s) return 0;
+      s = s.replace(/[^\d]/g,'');
+      return s ? parseInt(s,10) : 0;
     }
 
-    const t = calcT(data, temArq);
-    const M = regra * data.p; // M = p ou 2p
-    const diff = t - M;       // positivo = acima, negativo = faltando
-    const ratio = (t / data.p);
-
-    document.getElementById('formulaTexto').textContent = formulaText(temArq);
-    document.getElementById('outT').textContent = fmtInt(t);
-    document.getElementById('outM').textContent = fmtInt(M);
-
-    if (diff >= 0) {
-      document.getElementById('outDiff').innerHTML =
-        `<span class="ok">OK</span> — você está <span class="ok">${fmtInt(diff)}</span> acima do mínimo.`;
-    } else {
-      document.getElementById('outDiff').innerHTML =
-        `<span class="bad">FALTANDO</span> — faltam <span class="bad">${fmtInt(Math.abs(diff))}</span> tropas equivalentes para bater o mínimo.`;
+    function fmt(n){
+      try { return (n ?? 0).toLocaleString('pt-BR'); }
+      catch { return String(n ?? 0); }
     }
 
-    document.getElementById('outRatio').textContent = ratio.toFixed(2);
+    function ceilDiv(a,b){ return Math.ceil(a/b); }
 
-    // Sugestões equivalentes (se estiver faltando)
-    if (diff >= 0) {
-      document.getElementById('outSug').textContent = "Você já bateu o mínimo. Se quiser subir a régua, aumente a regra para 2p e/ou foque em tropas com maior peso (CL/CP/Ar/Ct).";
-    } else {
-      const falta = Math.abs(diff);
-      const sug = [
-        `Para cobrir ${fmtInt(falta)} equivalentes, você precisaria de aproximadamente:`,
-        `• ${fmtInt(ceilDiv(falta, 4))} CL (peso 4)`,
-        `• ${fmtInt(ceilDiv(falta, 6))} CP (peso 6)`,
-        `• ${fmtInt(ceilDiv(falta, 5))} Aríetes (peso 5)`,
-        `• ${fmtInt(ceilDiv(falta, 8))} Catapultas (peso 8)`,
-      ];
-      if (temArq) sug.push(`• ${fmtInt(ceilDiv(falta, 5))} Arqueiros a cavalo (Ac, peso 5)`);
-      document.getElementById('outSug').textContent = sug.join("\n");
+    function getMultiplierFromPhase(phase, customStr){
+      if(phase === "early") return 1;
+      if(phase === "mid") return 1.5;
+      if(phase === "late") return 2;
+      // custom
+      const m = Number(String(customStr || "").replace(",", "."));
+      if(!isFinite(m) || m <= 0) return 1;
+      return m;
     }
 
-    document.getElementById('status').textContent = "Cálculo atualizado.";
-  }
+    function formulaText(hasArchers){
+      return hasArchers
+        ? "t = Lc + Ep + Bb + Aq + (Cl×4) + (Ac×5) + (Cp×6) + (Ar×5) + (Ct×8) + (Pl×10)"
+        : "t = Lc + Ep + Bb + (Cl×4) + (Cp×6) + (Ar×5) + (Ct×8) + (Pl×10)";
+    }
 
-  // Botões
-  document.getElementById('btnCalcular').addEventListener('click', render);
-
-  document.getElementById('btnLimpar').addEventListener('click', () => {
-    const ids = ['pontos','Lc','Ep','Bb','Cl','Cp','Ar','Ct','Pl','Aq','Ac'];
-    ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    document.getElementById('regraMinimo').value = '2';
-    document.getElementById('temArqueiros').checked = false;
-    document.getElementById('rowAq').style.display = 'none';
-    document.getElementById('rowAc').style.display = 'none';
-    document.getElementById('outT').textContent = '—';
-    document.getElementById('outM').textContent = '—';
-    document.getElementById('outDiff').textContent = '';
-    document.getElementById('outRatio').textContent = '—';
-    document.getElementById('outSug').textContent = '—';
-    document.getElementById('status').textContent = 'Limpo.';
-  });
-
-  document.getElementById('btnExemplo').addEventListener('click', () => {
-    // Seu exemplo real
-    document.getElementById('pontos').value = '43.079';
-    document.getElementById('temArqueiros').checked = false;
-    document.getElementById('Lc').value = '9942';
-    document.getElementById('Ep').value = '7127';
-    document.getElementById('Bb').value = '7616';
-    document.getElementById('Cl').value = '4587';
-    document.getElementById('Cp').value = '608';
-    document.getElementById('Ar').value = '556';
-    document.getElementById('Ct').value = '182';
-    document.getElementById('Pl').value = '3';
-    render();
-  });
-
-  // Atualiza ao digitar
-  const watchIds = ['pontos','Lc','Ep','Bb','Cl','Cp','Ar','Ct','Pl','Aq','Ac','regraMinimo','temArqueiros'];
-  watchIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', () => {
-      // não fica recalculando sem pontos
-      if (id === 'temArqueiros') {
-        // mostra/esconde campos
-        document.getElementById('rowAq').style.display = el.checked ? '' : 'none';
-        document.getElementById('rowAc').style.display = el.checked ? '' : 'none';
+    function loadPrefs(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if(!raw) return { fase:"late", mult:"2", temArqueiro:false };
+        const p = JSON.parse(raw);
+        return {
+          fase: p.fase ?? "late",
+          mult: p.mult ?? "2",
+          temArqueiro: !!p.temArqueiro
+        };
+      }catch{
+        return { fase:"late", mult:"2", temArqueiro:false };
       }
-      // recalcula se já tem pontos
-      if (parseBRNumber(document.getElementById('pontos').value) > 0) render();
-    });
-  });
+    }
 
-  // Estado inicial
-  document.getElementById('formulaTexto').textContent = formulaText(false);
-  document.getElementById('status').textContent = 'Preencha seus pontos e tropas e clique em Calcular.';
-</script>
+    function savePrefs(prefs){
+      localStorage.setItem(LS_KEY, JSON.stringify(prefs));
+    }
+
+    function syncUI(){
+      const tem = document.getElementById("temArqueiro").checked;
+      document.getElementById("wrapAq").style.display = tem ? "" : "none";
+      document.getElementById("wrapAc").style.display = tem ? "" : "none";
+      document.getElementById("formulaBox").textContent = formulaText(tem);
+
+      const fase = document.getElementById("fase").value;
+      const isCustom = fase === "custom";
+      document.getElementById("mult").disabled = !isCustom;
+
+      // pill
+      const prefs = {
+        fase,
+        mult: document.getElementById("mult").value,
+        temArqueiro: tem
+      };
+      savePrefs(prefs);
+
+      const faseLabel =
+        fase === "early" ? "Início (1x)" :
+        fase === "mid" ? "Meio (1,5x)" :
+        fase === "late" ? "Fim (2x)" : "Custom";
+
+      document.getElementById("pillSaved").textContent =
+        `Preferências: ${faseLabel} • arqueiros: ${tem ? "sim" : "não"}`;
+    }
+
+    function readData(){
+      const fase = document.getElementById("fase").value;
+      const temArqueiro = document.getElementById("temArqueiro").checked;
+      const mult = getMultiplierFromPhase(fase, document.getElementById("mult").value);
+
+      return {
+        p: parseBRInt(document.getElementById("pontos").value),
+        fase,
+        mult,
+        temArqueiro,
+        Lc: parseBRInt(document.getElementById("Lc").value),
+        Ep: parseBRInt(document.getElementById("Ep").value),
+        Bb: parseBRInt(document.getElementById("Bb").value),
+        Cl: parseBRInt(document.getElementById("Cl").value),
+        Cp: parseBRInt(document.getElementById("Cp").value),
+        Ar: parseBRInt(document.getElementById("Ar").value),
+        Ct: parseBRInt(document.getElementById("Ct").value),
+        Pl: parseBRInt(document.getElementById("Pl").value),
+        Aq: temArqueiro ? parseBRInt(document.getElementById("Aq").value) : 0,
+        Ac: temArqueiro ? parseBRInt(document.getElementById("Ac").value) : 0
+      };
+    }
+
+    function calcT(d){
+      // pesos do modelo:
+      // Lc, Ep, Bb, Aq => 1
+      // Cl*4, Ac*5, Cp*6, Ar*5, Ct*8, Pl*10
+      return d.Lc + d.Ep + d.Bb + (d.temArqueiro ? d.Aq : 0) +
+        (d.Cl * 4) + (d.temArqueiro ? (d.Ac * 5) : 0) +
+        (d.Cp * 6) + (d.Ar * 5) + (d.Ct * 8) + (d.Pl * 10);
+    }
+
+    function render(){
+      const d = readData();
+      const out = document.getElementById("out");
+
+      if(!d.p || d.p <= 0){
+        out.innerHTML = `<span class="bad">Preencha seus pontos (p)</span> para calcular.`;
+        return;
+      }
+
+      const t = calcT(d);
+      const M = Math.round(d.mult * d.p);
+      const diff = t - M;
+      const ratio = t / d.p;
+
+      const faseLabel =
+        d.fase === "early" ? "Início (1x)" :
+        d.fase === "mid" ? "Meio (1,5x)" :
+        d.fase === "late" ? "Fim (2x)" : `Custom (${String(d.mult).replace('.', ',')}x)`;
+
+      let s = "";
+      s += `t = ${fmt(t)}\n`;
+      s += `M = ${fmt(M)}  [${faseLabel}]\n`;
+      s += `t/p = ${ratio.toFixed(2)}\n\n`;
+
+      if(diff >= 0){
+        s += `✅ OK — você está acima do mínimo por ${fmt(diff)} equivalentes.`;
+        out.innerHTML = `<span class="ok">${s}</span>`;
+      }else{
+        const falta = Math.abs(diff);
+        s += `❌ FALTANDO — faltam ${fmt(falta)} equivalentes para bater o mínimo.\n\n`;
+
+        const sug = [
+          `≈ ${fmt(ceilDiv(falta, 4))} CL`,
+          `≈ ${fmt(ceilDiv(falta, 6))} CP`,
+          `≈ ${fmt(ceilDiv(falta, 5))} Aríetes`,
+          `≈ ${fmt(ceilDiv(falta, 8))} Catapultas`
+        ];
+        if(d.temArqueiro) sug.push(`≈ ${fmt(ceilDiv(falta, 5))} Ac`);
+
+        s += `Equivalência (aprox.):\n- ${sug.join("\n- ")}`;
+        out.innerHTML = `<span class="bad">${s}</span>`;
+      }
+    }
+
+    function clearInputs(){
+      const ids = ["pontos","Lc","Ep","Bb","Cl","Cp","Ar","Ct","Pl","Aq","Ac"];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = "";
+      });
+      document.getElementById("out").textContent = "Preencha os dados e clique em “Calcular”.";
+    }
+
+    function loadExample(){
+      // Seu caso (sem arqueiros)
+      document.getElementById("pontos").value = "43.079";
+      document.getElementById("temArqueiro").checked = false;
+      document.getElementById("fase").value = "late";
+      document.getElementById("mult").value = "2";
+
+      document.getElementById("Lc").value = "9942";
+      document.getElementById("Ep").value = "7127";
+      document.getElementById("Bb").value = "7616";
+      document.getElementById("Cl").value = "4587";
+      document.getElementById("Cp").value = "608";
+      document.getElementById("Ar").value = "556";
+      document.getElementById("Ct").value = "182";
+      document.getElementById("Pl").value = "3";
+      document.getElementById("Aq").value = "0";
+      document.getElementById("Ac").value = "0";
+
+      syncUI();
+      render();
+    }
+
+    // Init
+    (function init(){
+      const prefs = loadPrefs();
+      document.getElementById("fase").value = prefs.fase;
+      document.getElementById("mult").value = prefs.mult;
+      document.getElementById("temArqueiro").checked = prefs.temArqueiro;
+
+      syncUI();
+
+      document.getElementById("btnCalc").addEventListener("click", render);
+      document.getElementById("btnLimpar").addEventListener("click", clearInputs);
+      document.getElementById("btnExemplo").addEventListener("click", loadExample);
+
+      // Auto update on input (se já tiver p)
+      const watch = ["pontos","Lc","Ep","Bb","Cl","Cp","Ar","Ct","Pl","Aq","Ac","fase","mult","temArqueiro"];
+      watch.forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.addEventListener("input", () => {
+          syncUI();
+          if(parseBRInt(document.getElementById("pontos").value) > 0) render();
+        });
+        el.addEventListener("change", () => {
+          syncUI();
+          if(parseBRInt(document.getElementById("pontos").value) > 0) render();
+        });
+      });
+
+      // Set formula box
+      document.getElementById("formulaBox").textContent = formulaText(document.getElementById("temArqueiro").checked);
+    })();
+  </script>
 </body>
 </html>
