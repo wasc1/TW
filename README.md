@@ -1,2 +1,2 @@
 # TW
-Repositório destinado a scripts TW
+Repositório destinado a TW
